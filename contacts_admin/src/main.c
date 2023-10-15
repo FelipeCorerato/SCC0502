@@ -1,71 +1,83 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "./lib/skip_list/skip_list.h"
-
-typedef struct Contact {
-    char name [10];
-    char number [9];
-} Contact;
 
 int main() {
     char operation;
 
-    int arr[] = { 3, 6, 9, 2, 11, 1, 4 };
     SkipList list;
     initializeSkipList(&list);
 
-    printf("Insert:--------------------\n");
-    for (int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
-        insert(&list, arr[i], arr[i]);
-    }
-    dump(&list);
+    for (;;) {
+        scanf("%c", &operation);
 
-    printf("Search:--------------------\n");
-    int keys[] = { 3, 4, 7, 10, 111 };
+        if (operation == '0') {
+            break;
+        }
 
-    for (int i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
-        Node* x = search(&list, keys[i]);
-        if (x) {
-            printf("key = %d, value = %d\n", keys[i], x->value);
-        } else {
-            printf("key = %d, not found\n", keys[i]);
+        int name;
+        char* number;
+
+        switch (operation) {
+            case 'I':
+                scanf("%d ", &name);
+                number = (char*) malloc(9 * sizeof(char));
+                fgets(number, 10, stdin);
+                number[strcspn(number, "\n")] = '\0';
+
+                if (exists(&list, name)) {
+                    printf("Contatinho ja inserido\n");
+                    break;
+                }
+
+                insert(&list, name, number);
+            break;
+            case 'P':
+                scanf("%d", &name);
+
+                Node* n = search(&list, name);
+                if (n == NULL) {
+                    printf("Operacao invalida: contatinho nao encontrado\n");
+                    break;
+                }
+
+                printf("Contatinho encontrado: telefone %s\n", n->value);
+            break;
+            case 'A':
+                scanf("%d ", &name);
+                number = (char*) malloc(9 * sizeof(char));
+                fgets(number, 10, stdin);
+                number[strcspn(number, "\n")] = '\0';
+
+                if (!exists(&list, name)) {
+                    printf("Operacao invalida: contatinho nao encontrado\n");
+                    break;
+                }
+
+                insert(&list, name, number);
+            break;
+            case 'R':
+                scanf("%d", &name);
+
+                if (!exists(&list, name)) {
+                    printf("Operacao invalida: contatinho nao encontrado\n");
+                    break;
+                }
+
+                delete(&list, name);
+            break;
+            default:
+                insert(&list, 123, "felipe");
+                insert(&list, 456, "catarina");
+                printList(&list);
+
+                insert(&list, 456, "hannah");
+                printList(&list);
+            break;
         }
     }
-
-    printf("Search:--------------------\n");
-    delete(&list, 3);
-    delete(&list, 9);
-    dump(&list);
-
-//    for (;;) {
-//        scanf("%c", &operation);
-//
-//        if (operation == '0') {
-//            break;
-//        }
-//
-//        Contact contact;
-//        switch (operation) {
-//            case 'I':
-//                scanf("%s", &contact.name);
-//                scanf("%s", &contact.number);
-//
-//                printf("name: %s.\n", contact.name);
-//                printf("number: %s.\n", contact.number);
-//            case 'P':
-//                scanf("%s", &contact.name);
-//                printf("name: %s.\n", contact.name);
-//            case 'A':
-//                scanf("%s", &contact.name);
-//                scanf("%s", &contact.number);
-//
-//                printf("name: %s.\n", contact.name);
-//                printf("number: %s.\n", contact.number);
-//            case 'R':
-//                scanf("%s", &contact.name);
-//                printf("name: %s.\n", contact.name);
-//        }
-//    }
 
     return 0;
 }

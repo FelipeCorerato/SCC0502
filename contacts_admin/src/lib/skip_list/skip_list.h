@@ -5,7 +5,7 @@
 
 typedef struct Node {
     int key;
-    int value;
+    char* value;
     struct Node** forward;
 } Node;
 
@@ -17,10 +17,11 @@ typedef struct SkipList {
 
 void initializeSkipList(SkipList* list);
 Node* search(SkipList* list, int key);
+int exists(SkipList* list, int key);
 static int generateRandomLevel();
-void insert(SkipList* list, int key, int value);
+void insert(SkipList* list, int key, char* value);
 static void freeNode(Node* x);
 void delete(SkipList* list, int key);
-void dump(SkipList* list);
+void printList(SkipList* list);
 
 #endif

@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "./skip_list.h"
 
@@ -9,6 +10,7 @@ void initializeSkipList(SkipList* list) {
 
     list->header = header;
     header->key = INT_MAX;
+
     header->forward = (Node**) malloc((SKIP_LIST_MAX_LEVEL + 1) * sizeof(Node*));
     for (int i = 0; i <= SKIP_LIST_MAX_LEVEL; i++) {
         header->forward[i] = list->header;
@@ -22,14 +24,21 @@ Node* search(SkipList* list, int key) {
     Node* x = list->header;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key)
+        while (x->forward[i]->key < key) {
             x = x->forward[i];
+        }
     }
+
     if (x->forward[1]->key == key) {
         return x->forward[1];
     } else {
         return NULL;
     }
+}
+
+int exists(SkipList* list, int key) {
+    Node* n = search(list, key);
+    return n != NULL;
 }
 
 static int generateRandomLevel() {
@@ -41,14 +50,16 @@ static int generateRandomLevel() {
     return level;
 }
 
-void insert(SkipList* list, int key, int value) {
+void insert(SkipList* list, int key, char* value) {
     Node* update[SKIP_LIST_MAX_LEVEL + 1];
     Node* x = list->header;
     int level;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key)
+        while (x->forward[i]->key < key) {
             x = x->forward[i];
+        }
+
         update[i] = x;
     }
     x = x->forward[1];
@@ -76,6 +87,8 @@ void insert(SkipList* list, int key, int value) {
             x->forward[i] = update[i]->forward[i];
             update[i]->forward[i] = x;
         }
+
+        list->size = list->size + 1;
     }
 }
 
@@ -91,8 +104,10 @@ void delete(SkipList* list, int key) {
     Node* x = list->header;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key)
+        while (x->forward[i]->key < key) {
             x = x->forward[i];
+        }
+
         update[i] = x;
     }
 
@@ -112,14 +127,17 @@ void delete(SkipList* list, int key) {
         while (list->level > 1 && list->header->forward[list->level] == list->header) {
             list->level--;
         }
+
+        list->size = list->size - 1;
     }
 }
 
-void dump(SkipList* list) {
+void printList(SkipList* list) {
     Node* x = list->header;
     while (x && x->forward[1] != list->header) {
-        printf("%d[%d]->", x->forward[1]->key, x->forward[1]->value);
+        printf("%d[%s]->", x->forward[1]->key, x->forward[1]->value);
         x = x->forward[1];
     }
+
     printf("NIL\n");
 }
