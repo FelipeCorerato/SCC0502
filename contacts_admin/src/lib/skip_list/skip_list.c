@@ -1,4 +1,3 @@
-#include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,7 +8,7 @@ void initializeSkipList(SkipList* list) {
     Node* header = (Node*) malloc(sizeof(Node));
 
     list->header = header;
-    header->key = INT_MAX;
+    strcpy(header->key, "");
 
     header->forward = (Node**) malloc((SKIP_LIST_MAX_LEVEL + 1) * sizeof(Node*));
     for (int i = 0; i <= SKIP_LIST_MAX_LEVEL; i++) {
@@ -20,23 +19,24 @@ void initializeSkipList(SkipList* list) {
     list->size = 0;
 }
 
-Node* search(SkipList* list, int key) {
+Node* search(SkipList* list, char* key) {
     Node* x = list->header;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key) {
+        while (x->forward[i] != list->header && strcmp(x->forward[i]->key, key) < 0) {
             x = x->forward[i];
         }
     }
 
-    if (x->forward[1]->key == key) {
+    if (x->forward[1] != list->header && strcmp(x->forward[1]->key, key) == 0) {
         return x->forward[1];
     } else {
         return NULL;
     }
 }
 
-int exists(SkipList* list, int key) {
+
+int exists(SkipList* list, char* key) {
     Node* n = search(list, key);
     return n != NULL;
 }
@@ -50,22 +50,26 @@ static int generateRandomLevel() {
     return level;
 }
 
-void insert(SkipList* list, int key, char* value) {
+void insert(SkipList* list, char* key, char* value) {
     Node* update[SKIP_LIST_MAX_LEVEL + 1];
     Node* x = list->header;
     int level;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key) {
+        while (x->forward[i] != list->header && strcmp(x->forward[i]->key, key) < 0) {
             x = x->forward[i];
         }
 
         update[i] = x;
     }
-    x = x->forward[1];
 
-    if (key == x->key) {
-        x->value = value;
+    if (x->forward[1] != list->header) {
+        x = x->forward[1];
+    }
+
+    if (x != list->header && strcmp(key, x->key) == 0) {
+        free(x->value); // Liberar a memória do valor antigo
+        x->value = strdup(value); // Fazer uma cópia do novo valor
         return;
     } else {
         level = generateRandomLevel();
@@ -79,8 +83,8 @@ void insert(SkipList* list, int key, char* value) {
         }
 
         x = (Node*) malloc(sizeof(Node));
-        x->key = key;
-        x->value = value;
+        strcpy(x->key, key);
+        x->value = strdup(value); // Fazer uma cópia do valor
         x->forward = (Node**) malloc(sizeof(Node*) * (level + 1));
 
         for (int i = 1; i <= level; i++) {
@@ -99,21 +103,23 @@ static void freeNode(Node* x) {
     }
 }
 
-void delete(SkipList* list, int key) {
+void delete(SkipList* list, char* key) {
     Node* update[SKIP_LIST_MAX_LEVEL + 1];
     Node* x = list->header;
 
     for (int i = list->level; i >= 1; i--) {
-        while (x->forward[i]->key < key) {
+        while (x->forward[i] != list->header && strcmp(x->forward[i]->key, key) < 0) {
             x = x->forward[i];
         }
 
         update[i] = x;
     }
 
-    x = x->forward[1];
+    if (x->forward[1] != list->header) {
+        x = x->forward[1];
+    }
 
-    if (x->key == key) {
+    if (x != list->header && strcmp(x->key, key) == 0) {
         for (int i = 1; i <= list->level; i++) {
             if (update[i]->forward[i] != x) {
                 break;
@@ -122,6 +128,7 @@ void delete(SkipList* list, int key) {
             update[i]->forward[i] = x->forward[i];
         }
 
+        free(x->value); // Liberar a memória do valor
         freeNode(x);
 
         while (list->level > 1 && list->header->forward[list->level] == list->header) {
@@ -135,7 +142,7 @@ void delete(SkipList* list, int key) {
 void printList(SkipList* list) {
     Node* x = list->header;
     while (x && x->forward[1] != list->header) {
-        printf("%d[%s]->", x->forward[1]->key, x->forward[1]->value);
+        printf("%s[%s]->", x->forward[1]->key, x->forward[1]->value);
         x = x->forward[1];
     }
 

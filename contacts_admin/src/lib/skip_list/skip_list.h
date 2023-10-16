@@ -4,7 +4,7 @@
 #define SKIP_LIST_MAX_LEVEL 6
 
 typedef struct Node {
-    int key;
+    char key[11];
     char* value;
     struct Node** forward;
 } Node;
@@ -16,12 +16,12 @@ typedef struct SkipList {
 } SkipList;
 
 void initializeSkipList(SkipList* list);
-Node* search(SkipList* list, int key);
-int exists(SkipList* list, int key);
+Node* search(SkipList* list, char* key);
+int exists(SkipList* list, char* key);
 static int generateRandomLevel();
-void insert(SkipList* list, int key, char* value);
+void insert(SkipList* list, char* key, char* value);
 static void freeNode(Node* x);
-void delete(SkipList* list, int key);
+void delete(SkipList* list, char* key);
 void printList(SkipList* list);
 
 #endif
