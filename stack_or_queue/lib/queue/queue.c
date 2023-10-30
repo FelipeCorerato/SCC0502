@@ -27,3 +27,7 @@ int dequeue(Queue* queue) {
 
     return ret;
 }
+
+void destroyQueue(Queue* queue) {
+    free(queue->array);
+}

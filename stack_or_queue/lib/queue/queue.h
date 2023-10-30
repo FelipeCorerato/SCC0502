@@ -10,5 +10,6 @@ typedef struct Queue {
 void initializeQueue(Queue* queue, int size);
 void enqueue(Queue* queue, int value);
 int dequeue(Queue* queue);
+void destroyQueue(Queue* queue);
 
 #endif

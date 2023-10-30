@@ -67,6 +67,9 @@ int main() {
             printf(IMPOSSIBLE);
         }
         printf("\n");
+
+        destroyStack(&stack);
+        destroyQueue(&queue);
     }
 
     return 0;

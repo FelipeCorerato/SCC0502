@@ -25,3 +25,7 @@ int pop(Stack* stack) {
 
     return ret;
 }
+
+void destroyStack(Stack* stack) {
+    free(stack->array);
+}

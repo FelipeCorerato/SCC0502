@@ -10,5 +10,6 @@ typedef struct Stack {
 void initializeStack(Stack* stack, int size);
 void push(Stack* stack, int value);
 int pop(Stack* stack);
+void destroyStack(Stack* stack);
 
 #endif
