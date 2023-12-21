@@ -14,6 +14,33 @@ char* getInputFilename(char* filePath) {
     return (filename != NULL) ? filename + 1 : filePath;
 }
 
+char* getFilenameExtension(char* filename) {
+    char* extension = strrchr(filename, '.');
+
+    if (extension != NULL && extension != filename + strlen(filename) - 1) {
+        return extension;
+    }
+
+    return "";
+}
+
+char* getTempFilename(char* filename) {
+    char* tempFilename = (char*) malloc(FILENAME_MAX);
+    char* extension = getFilenameExtension(filename);
+
+    strcat(tempFilename, "temp_filename_");
+
+    time_t timestamp = time(NULL);
+    struct tm *tm_info = localtime(&timestamp);
+    char timestampStr[20];
+    strftime(timestampStr, sizeof(timestampStr), "%Y%m%d%H%M%S", tm_info);
+
+    strcat(tempFilename, timestampStr);
+    strcat(tempFilename, extension);
+
+    return tempFilename;
+}
+
 char* getOutputFilename(char* filePath) {
     char* slash = strrchr(filePath, '/');
     char* filenameStartInPath = slash ? slash + 1 : filePath;
@@ -71,28 +98,33 @@ void addFilenameInFile(char* inputFilePath) {
     FILE* inputFile = fopen(inputFilePath, "r+");
 
     if (inputFile != NULL) {
-        // Move o cursor para o início do arquivo
-        fseek(inputFile, 0, SEEK_SET);
+        char* inputFilename = getInputFilename(inputFilePath);
+        char* tempFilename = getTempFilename(inputFilename);
+//        printf("nome temp: %s\n", tempFilename);
 
-        // Escreve na primeira linha do arquivo
-        fprintf(inputFile, "Nova primeira linha\n");
+        FILE* tempFile = fopen(tempFilename, "w");
+        fprintf(tempFile, "%s\n", inputFilename);
 
-        // Fecha o arquivo
+        char line[FILENAME_MAX];
+        while (fgets(line, sizeof(line), inputFile) != NULL) {
+            fprintf(tempFile, "%s", line);
+        }
+
         fclose(inputFile);
+        fclose(tempFile);
 
-        printf("Conteúdo do arquivo foi atualizado.\n");
+        remove(inputFilePath);
+        rename(tempFilename, inputFilePath);
     } else {
         printf("Erro ao abrir o arquivo.\n");
     }
 }
 
 void removeFilenameFromFile(char* inputFilePath) {
-    char tempFilename[FILENAME_MAX];
-    tmpnam(tempFilename);
-
     FILE* inputFile = fopen(inputFilePath, "r");
 
     if (inputFile != NULL) {
+        char* tempFilename = getTempFilename(getInputFilename(inputFilePath));
         FILE* tempFile = fopen(tempFilename, "w");
 
         if (tempFile != NULL) {
@@ -123,7 +155,7 @@ void compressFile(char* inputFilePath) {
     clock_t start, finish;
     start = clock();
 
-//    addFilenameInFile(inputFilePath);
+    addFilenameInFile(inputFilePath);
 
     char* outputFilename = getOutputFilename(inputFilePath);
 
