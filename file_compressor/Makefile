@@ -3,6 +3,7 @@ compactor-program = compactador
 decompressor-program = descompactador
 
 tests-directory = ./src/__test__
+build-directory = ./build
 
 clean:
 	rm -r src/lib/*/*.o $(program)
@@ -16,6 +17,10 @@ compile-decompressor: ./src/decompressor.c ./src/lib/byte/byte.c ./src/lib/byte/
 compile-all: ./src/compactor.c ./src/decompressor.c ./src/lib/byte/byte.c ./src/lib/byte/byte.h ./src/lib/huffman/huffman.c ./src/lib/huffman/huffman.h ./src/lib/list/list.c ./src/lib/list/list.h ./src/lib/tree/tree.c ./src/lib/tree/tree.h
 	$(CC) -o $(compactor-program) ./src/compactor.c ./src/lib/byte/byte.c ./src/lib/huffman/huffman.c ./src/lib/list/list.c ./src/lib/tree/tree.c
 	$(CC) -o $(decompressor-program) ./src/decompressor.c ./src/lib/byte/byte.c ./src/lib/huffman/huffman.c ./src/lib/list/list.c ./src/lib/tree/tree.c
+
+generate-build: ./src/compactor.c ./src/decompressor.c ./src/lib/byte/byte.c ./src/lib/byte/byte.h ./src/lib/huffman/huffman.c ./src/lib/huffman/huffman.h ./src/lib/list/list.c ./src/lib/list/list.h ./src/lib/tree/tree.c ./src/lib/tree/tree.h
+	$(CC) -o $(build-directory)/$(compactor-program) ./src/compactor.c ./src/lib/byte/byte.c ./src/lib/huffman/huffman.c ./src/lib/list/list.c ./src/lib/tree/tree.c
+	$(CC) -o $(build-directory)/$(decompressor-program) ./src/decompressor.c ./src/lib/byte/byte.c ./src/lib/huffman/huffman.c ./src/lib/list/list.c ./src/lib/tree/tree.c
 
 exec-compactor:
 	$(CC) -o $(compactor-program) ./src/compactor.c ./src/lib/byte/byte.c ./src/lib/huffman/huffman.c ./src/lib/list/list.c ./src/lib/tree/tree.c

@@ -29,10 +29,6 @@ void fileError() {
 
 char* getOutputFilename(const char* filename) {
     FILE* file = fopen(filename, "r");
-    if (file == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
-        return NULL;
-    }
 
     char line[1000];
     if (fgets(line, sizeof(line), file) != NULL) {
@@ -56,18 +52,8 @@ char* getOutputFilename(const char* filename) {
 void deleteFirstLine(const char* filename) {
     FILE* originalFile = fopen(filename, "r");
 
-    if (originalFile == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
-        return;
-    }
-
     char* tempFilename = getTempFilename("deleteFirstLine");
     FILE* tempFile = fopen(tempFilename, "w");
-    if (tempFile == NULL) {
-        printf("Erro ao criar arquivo temporário.\n");
-        fclose(originalFile);
-        return;
-    }
 
     int character;
     while ((character = fgetc(originalFile)) != EOF && character != '\n');
@@ -84,9 +70,6 @@ void deleteFirstLine(const char* filename) {
 }
 
 void decompressFile(const char* inputFilename) {
-    clock_t start, finish;
-    start = clock();
-
     unsigned bytesList[256] = {0};
 
     char* tempFilename = getTempFilename("decompressFile");
@@ -120,17 +103,8 @@ void decompressFile(const char* inputFilename) {
 
     freeHuffmanTree(root);
 
-    finish = clock();
-    double spentTime = (double)(finish - start) / CLOCKS_PER_SEC;
-
     fseek(inputFile, 0L, SEEK_END);
-    double inputFileSize = ftell(inputFile);
-
     fseek(outputFile, 0L, SEEK_END);
-    double outputFileSize = ftell(outputFile);
-
-    printf("Arquivo de entrada: %s (%g bytes)\nArquivo de saida: %s (%g bytes)\nTempo gasto: %gs\n", inputFilename, inputFileSize / 1000, tempFilename, outputFileSize / 1000, spentTime);
-    printf("Taxa de descompressao: %d%%\n", (int)((100 * outputFileSize) / inputFileSize));
 
     char* outputFilename = getOutputFilename(tempFilename);
 

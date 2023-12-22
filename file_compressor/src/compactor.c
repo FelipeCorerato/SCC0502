@@ -97,64 +97,45 @@ void fileError() {
 void addFilenameInFile(char* inputFilePath) {
     FILE* inputFile = fopen(inputFilePath, "r+");
 
-    if (inputFile != NULL) {
-        char* inputFilename = getInputFilename(inputFilePath);
-        char* tempFilename = getTempFilename(inputFilename);
-//        printf("nome temp: %s\n", tempFilename);
+    char* inputFilename = getInputFilename(inputFilePath);
+    char* tempFilename = getTempFilename(inputFilename);
 
-        FILE* tempFile = fopen(tempFilename, "w");
-        fprintf(tempFile, "%s\n", inputFilename);
+    FILE* tempFile = fopen(tempFilename, "w");
+    fprintf(tempFile, "%s\n", inputFilename);
 
-        char line[FILENAME_MAX];
-        while (fgets(line, sizeof(line), inputFile) != NULL) {
-            fprintf(tempFile, "%s", line);
-        }
-
-        fclose(inputFile);
-        fclose(tempFile);
-
-        remove(inputFilePath);
-        rename(tempFilename, inputFilePath);
-    } else {
-        printf("Erro ao abrir o arquivo.\n");
+    char line[FILENAME_MAX];
+    while (fgets(line, sizeof(line), inputFile) != NULL) {
+        fprintf(tempFile, "%s", line);
     }
+
+    fclose(inputFile);
+    fclose(tempFile);
+
+    remove(inputFilePath);
+    rename(tempFilename, inputFilePath);
 }
 
 void removeFilenameFromFile(char* inputFilePath) {
     FILE* inputFile = fopen(inputFilePath, "r");
 
-    if (inputFile != NULL) {
-        char* tempFilename = getTempFilename(getInputFilename(inputFilePath));
-        FILE* tempFile = fopen(tempFilename, "w");
+    char* tempFilename = getTempFilename(getInputFilename(inputFilePath));
+    FILE* tempFile = fopen(tempFilename, "w");
 
-        if (tempFile != NULL) {
-            int c;
-            while ((c = fgetc(inputFile)) != EOF && c != '\n') {  }
+    int c;
+    while ((c = fgetc(inputFile)) != EOF && c != '\n') {  }
 
-            while ((c = fgetc(inputFile)) != EOF) {
-                fputc(c, tempFile);
-            }
-
-            fclose(inputFile);
-            fclose(tempFile);
-
-            remove(inputFilePath);
-            rename(tempFilename, inputFilePath);
-
-            printf("Primeira linha removida com sucesso.\n");
-        } else {
-            printf("Erro ao abrir o arquivo temporário.\n");
-            fclose(inputFile);
-        }
-    } else {
-        printf("Erro ao abrir o arquivo original.\n");
+    while ((c = fgetc(inputFile)) != EOF) {
+        fputc(c, tempFile);
     }
+
+    fclose(inputFile);
+    fclose(tempFile);
+
+    remove(inputFilePath);
+    rename(tempFilename, inputFilePath);
 }
 
 void compressFile(char* inputFilePath) {
-    clock_t start, finish;
-    start = clock();
-
     addFilenameInFile(inputFilePath);
 
     char* outputFilename = getOutputFilename(inputFilePath);
@@ -205,24 +186,10 @@ void compressFile(char* inputFilePath) {
 
     fwrite(&size, 1, sizeof(unsigned), outputFile);
 
-    finish = clock();
-    double spentTime = (double)(finish - start) / CLOCKS_PER_SEC;
-
     fseek(inputFile, 0L, SEEK_END);
-    double inputFileSize = ftell(inputFile);
-
     fseek(outputFile, 0L, SEEK_END);
-    double outputFileSize = ftell(outputFile);
 
     freeHuffmanTree(root);
-
-    printf("Arquivo de entrada: %s (%g bytes)\nArquivo de saida: %s (%g bytes)\nTempo gasto: %gs\n", inputFilePath, inputFileSize / 1000, outputFilename, outputFileSize / 1000, spentTime);
-    printf("Taxa de compressao: %d%%\n", (int) ((100 * outputFileSize) / inputFileSize));
-
-//    char tempFilename[256];
-//    char* inputFilename = getInputFilename(inputFilePath);
-//    snprintf(tempFilename, sizeof(tempFilename), "%.*s-temp%s", (int)(strrchr(inputFilename, '.') - inputFilename), inputFilename, strrchr(inputFilename, '.'));
-//    FILE *tempFile = fopen(tempFilename, "w");
 
     fclose(inputFile);
     fclose(outputFile);
